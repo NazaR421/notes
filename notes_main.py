@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QPushButton,QSpinBox, QLabel, QVBoxLayout,QRadioButton,\
-    QHBoxLayout,QButtonGroup,QGroupBox,QApplication,QLineEdit,QListWidget,QTextEdit,QLineEdit
+    QHBoxLayout,QButtonGroup,QGroupBox,QApplication,QLineEdit,QListWidget,QTextEdit,QInputDialog
 import json 
 
 app=QApplication([])
@@ -8,12 +8,14 @@ app=QApplication([])
 #словник
 notes={
     "Ласкаво просимо!":{
-        "текс":"Це найкращий додаток замыток у світі!",
-        "теги":["Замытки","інструкція"]
+        "текст":"Це найкращий додаток замыток у світі!",
+        "теги":["Замітки","інструкція"]
     }
 } 
 with open("notes_data.json","w") as file:
     json.dump(notes,file)
+
+
 
 notes_window=QWidget()
 notes_window.setWindowTitle("Розумні замітки")
@@ -74,7 +76,29 @@ layout_notes.addLayout(col_1,stretch=2)
 layout_notes.addLayout(col_2,stretch=1)
 notes_window.setLayout(layout_notes)
 
+note_name=()
 
+def add_note():
+    note_name, ok=QInputDialog.getText(notes_window,"Додати замітку","Назва замітки:")
+    if ok and note_name !="":
+        notes[note_name]={"текст":"","теги": []}
+        list_notes.addItem(note_name)
+        list_tags.addItems(notes[note_name]["теги"])
+button_note_create.clicked.connect(add_note)
+
+def del_note():
+    if list_notes.selectedItems():
+        key = list_notes.selectedItems()[0].text()
+        del notes[key]
+        list_notes.clear()
+        field_text.clear()
+        list_notes.addItems(notes)
+        with open("notes_data.json","w")as file:
+            json.dump(notes,file,sort_keys=True,ensure_ascii=False)
+        print(notes)
+    else:
+        print("Замітка для вилучення не обрана!")
+button_note_del.clicked.connect(del_note)
 
 
 
