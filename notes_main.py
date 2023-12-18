@@ -100,7 +100,38 @@ def del_note():
         print("Замітка для вилучення не обрана!")
 button_note_del.clicked.connect(del_note)
 
+def save_note():
+    if list_notes.selectedItems():
+        key=list_notes.selectedItems()[0].text()
+        notes[key]["текст"]=field_text.toPlainText()
+        with open("notes_data.json","w")as file:
+            json.dump(notes,file,sort_keys=True,ensure_ascii=False)
+        print(notes)
+    else:
+        print("Замітка для збереження не обрана!")
+button_note_save.clicked.connect(save_note)
 
+def add_teg():
+    if list_notes.selectedItems():
+        key = list_notes.selectedItems()[0].text()
+        tag= field_tag.text()
+        if not tag in notes[key]["теги"]:
+            notes[key]["теги"].append(tag)
+            list_tags.addItem(tag)
+            field_tag.clear()
+        with open("notes_data.json","w")as file:
+            json.dump(notes,file,sort_keys=True,ensure_ascii=False)
+        print(notes)
+    else:
+        print("Замітка для додавання тега не обрана!")
+button_tag_add.clicked.connect(add_teg)
+
+def del_tag():
+button_tag_del.clicked.connect(del_tag)
+
+def search_tag():
+button_tag_search.clicked.connect(search_tag)
 
 notes_window.show()
 app.exec_()
+
