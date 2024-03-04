@@ -1,137 +1,169 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QPushButton,QSpinBox, QLabel, QVBoxLayout,QRadioButton,\
-    QHBoxLayout,QButtonGroup,QGroupBox,QApplication,QLineEdit,QListWidget,QTextEdit,QInputDialog
-import json 
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QTextEdit, QLineEdit, QListWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QInputDialog
 
-app=QApplication([])
-
-#словник
-notes={
-    "Ласкаво просимо!":{
-        "текст":"Це найкращий додаток замыток у світі!",
-        "теги":["Замітки","інструкція"]
-    }
-} 
-with open("notes_data.json","w") as file:
-    json.dump(notes,file)
+import json
 
 
+app = QApplication([])
 
-notes_window=QWidget()
-notes_window.setWindowTitle("Розумні замітки")
-notes_window.resize(900,600)
-
+roster = {}
 
 
-list_notes_label=QLabel("Список заміток")
-list_notes=QListWidget()
-button_note_create=QPushButton("Створити замітку")
-button_note_del=QPushButton("Видалити замітку")
-button_note_save=QPushButton("Зберегти зміну")
-field_text=QTextEdit()
-list_tags_label=QLabel("Список тегів")
-list_tags=QListWidget()
-field_tag=QLineEdit()
-field_tag.setPlaceholderText("Введіть тег... ")
-button_tag_add=QPushButton("Додати до замітки")
-button_tag_del=QPushButton("Відкріпіти від замітки")
-button_tag_search=QPushButton("Шукати замітку по тегу")
+window = QWidget()
+window.setWindowTitle("Розумні замітки")
+window.resize(900, 500)
+
+text_edit = QTextEdit()
+notes = QLabel("Список заміток")
+list_notes = QListWidget()
+create_note = QPushButton("Створити замітку")
+del_note = QPushButton("Видалити замітку")
+save_not = QPushButton("Зберегти замітку")
+
+tag = QLabel("Список тегів")
+list_tag = QListWidget()
+enter_tags = QLineEdit()
+enter_tags.setPlaceholderText("Введіть тег...")
+
+add_tag = QPushButton("Додати до замітки")
+del_tag = QPushButton("Відкріпити від замітки")
+search_tag = QPushButton("Шукати ззамітку по тегу")
+
+line_x = QHBoxLayout()
+col1 = QVBoxLayout()
+col2 = QVBoxLayout()
+col1.addWidget(text_edit)
+
+col2.addWidget(notes)
+col2.addWidget(list_notes)
+
+line1 = QHBoxLayout()
+line1.addWidget(create_note)
+line1.addWidget(del_note)
+
+col2.addLayout(line1)
+col2.addWidget(save_not)
+
+col2.addWidget(tag)
+col2.addWidget(list_tag)
+col2.addWidget(enter_tags)
+
+line2 = QHBoxLayout()
+line2.addWidget(add_tag)
+line2.addWidget(del_tag)
+
+col2.addLayout(line2)
+col2.addWidget(search_tag)
 
 
-col_1=QVBoxLayout()
-col_1.addWidget(field_text)
+line_x.addLayout(col1, stretch = 2)
+line_x.addLayout(col2, stretch = 1)
 
-col_2=QVBoxLayout()
-col_2.addWidget(list_notes_label)
-col_2.addWidget(list_notes)
-
-
-row_1=QHBoxLayout()
-row_1.addWidget(button_note_create)
-row_1.addWidget(button_note_del)
-
-row_2=QHBoxLayout()
-row_2.addWidget(button_note_save)
-
-col_2.addLayout(row_1)
-col_2.addLayout(row_2)
-col_2.addWidget(list_tags_label)
-col_2.addWidget(list_tags)
-col_2.addWidget(field_tag)
-
-row_3=QHBoxLayout()
-row_3.addWidget(button_tag_add)
-row_3.addWidget(button_tag_del)
-
-row_4=QHBoxLayout()
-row_4.addWidget(button_tag_search)
-
-
-
-col_2.addLayout(row_3)
-col_2.addLayout(row_4)
-
-layout_notes=QHBoxLayout()
-layout_notes.addLayout(col_1,stretch=2)
-layout_notes.addLayout(col_2,stretch=1)
-notes_window.setLayout(layout_notes)
-
-note_name=()
+window.setLayout(line_x)
 
 def add_note():
-    note_name, ok=QInputDialog.getText(notes_window,"Додати замітку","Назва замітки:")
-    if ok and note_name !="":
-        notes[note_name]={"текст":"","теги": []}
-        list_notes.addItem(note_name)
-        list_tags.addItems(notes[note_name]["теги"])
-button_note_create.clicked.connect(add_note)
+    name_note, check_note = QInputDialog.getText(window, 'Створити замітку', 'Запиши назву замітки')
+    if check_note and name_note != '':
+        roster[name_note] = {'текст': '', 'теги':[]}
+        list_notes.addItem(name_note)
+        list_tag.addItems(roster[name_note]['теги'])
 
-def del_note():
-    if list_notes.selectedItems():
-        key = list_notes.selectedItems()[0].text()
-        del notes[key]
-        list_notes.clear()
-        field_text.clear()
-        list_notes.addItems(notes)
-        with open("notes_data.json","w")as file:
-            json.dump(notes,file,sort_keys=True,ensure_ascii=False)
-        print(notes)
-    else:
-        print("Замітка для вилучення не обрана!")
-button_note_del.clicked.connect(del_note)
+create_note.clicked.connect(add_note)
 
 def save_note():
     if list_notes.selectedItems():
-        key=list_notes.selectedItems()[0].text()
-        notes[key]["текст"]=field_text.toPlainText()
-        with open("notes_data.json","w")as file:
-            json.dump(notes,file,sort_keys=True,ensure_ascii=False)
-        print(notes)
+        key = list_notes.selectedItems()[0].text()
+        roster[key]['текст'] = text_edit.toPlainText()
+        with open('notes.json', 'w') as file:
+            json.dump(roster, file, sort_keys=True)
     else:
-        print("Замітка для збереження не обрана!")
-button_note_save.clicked.connect(save_note)
+        print("Замітку для збереження не обрано")  
 
-def add_teg():
+
+save_not.clicked.connect(save_note)
+
+def delete_note():
     if list_notes.selectedItems():
         key = list_notes.selectedItems()[0].text()
-        tag= field_tag.text()
-        if not tag in notes[key]["теги"]:
-            notes[key]["теги"].append(tag)
-            list_tags.addItem(tag)
-            field_tag.clear()
-        with open("notes_data.json","w")as file:
-            json.dump(notes,file,sort_keys=True,ensure_ascii=False)
-        print(notes)
+        del roster[key]
+        list_notes.clear()
+        list_tag.clear()
+        text_edit.clear()
+        list_notes.addItems(roster)
+        with open('notes.json', 'w') as file:
+            json.dump(roster, file, sort_keys=True)
     else:
-        print("Замітка для додавання тега не обрана!")
-button_tag_add.clicked.connect(add_teg)
+        print("Замітку для збереження не обрано") 
 
-def del_tag():
-button_tag_del.clicked.connect(del_tag)
+del_note.clicked.connect(delete_note)
 
-def search_tag():
-button_tag_search.clicked.connect(search_tag)
+def show_note():
+    note_text = list_notes.selectedItems()[0].text()
+    text_edit.setText(roster[note_text]['текст'])
+    list_tag.clear()
+    list_tag.addItems(roster[note_text]['теги'])
 
-notes_window.show()
+
+list_notes.itemClicked.connect(show_note)    
+
+def add_tags():
+    if list_notes.selectedItems():
+        key = list_notes.selectedItems()[0].text()
+        tag = enter_tags.text()
+        if not tag in roster[key]['теги']:
+            roster[key]['теги'].append(tag)
+            list_tag.addItem(tag)
+            enter_tags.clear()
+        with open('notes.json', 'w') as file:
+            json.dump(roster, file, sort_keys=True)
+    else:
+        print("Замітку для додавання тегу не обрано")     
+
+add_tag.clicked.connect(add_tags)
+
+
+def delete_tag():
+    if list_tag.selectedItems():
+        key = list_notes.selectedItems()[0].text()
+        tag = list_tag.selectedItems()[0].text()
+        roster[key]['теги'].remove(tag)
+        list_tag.clear()
+        list_tag.addItems(roster[key]['теги'])
+        with open('notes.json', 'w') as file:
+            json.dump(roster, file, sort_keys=True)
+    else:
+        print("Тег для видалення не обрано")
+
+del_tag.clicked.connect(delete_tag)
+
+def search_note():
+    tag = enter_tags.text()
+    if search_tag.text() == "Шукати ззамітку по тегу" and tag:
+        slovnik = {}
+        for rost in roster:
+            if tag in roster[rost]['теги']:
+                slovnik[rost] = roster[rost]
+        search_tag.setText('Скинути пошук')
+        list_notes.clear()
+        list_tag.clear()
+        list_notes.addItems(slovnik)
+    elif search_tag.text() == "Скинути пошук":
+        enter_tags.clear()
+        list_notes.clear()
+        list_tag.clear()
+        list_notes.addItems(roster)
+        search_tag.setText('Шукати ззамітку по тегу')            
+
+search_tag.clicked.connect(search_note)
+
+with open('notes.json', 'r') as file:
+    roster = json.load(file)
+
+
+list_notes.addItems(roster)
+
+
+
+window.show()
 app.exec_()
 
